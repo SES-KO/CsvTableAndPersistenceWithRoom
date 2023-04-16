@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.sesko.csvtableandpersistencewithroom.FirstFragment"
+        android:name="com.sesko.csvtableandpersistencewithroom.ItemFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_item">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
