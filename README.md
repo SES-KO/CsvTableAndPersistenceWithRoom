@@ -29,7 +29,7 @@ This is our example table data:
 |Shape|Corners|Edges|
 |-----|-------|-----|
 |rectangle|4|4|
-|circle|0|1|
+|circle|0|0|
 |triangle|3|3|
 |pentagon|5|5|
 |hexagon|6|6|
@@ -44,7 +44,7 @@ Save the table content in csv format to a file `shapes.csv`:
 ```
 Shape,Corners,Edges
 rectangle,4,4
-circle,0,1
+circle,0,0
 triangle,3,3
 pentagon,5,5
 hexagon,6,6
