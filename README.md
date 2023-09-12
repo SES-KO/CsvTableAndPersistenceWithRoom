@@ -60,7 +60,7 @@ sphere,0,0
 
 and upload this file to your Android device. Easiest way is to use drag&drop via the Device File Explorer in Android Studio.
 
-Create the data object
+Code the data object
 ----------------------
 Change the content of `PlaceholderContent.kt` to
 
@@ -122,12 +122,12 @@ Please note the function
 
 which calls
 
-´´´kotlin
+```kotlin
     private fun readStrictCsv(inputStream: InputStream) {
         val csvContents = csvReader().readAllWithHeader(inputStream)
         db = grass<Entry>().harvest(csvContents) as MutableList<Entry>
     }
-´´´
+```
 
 to fill the data object with the content from a csv file.
 We will see later how this is used.
