@@ -24,9 +24,11 @@ Load content from csv
 =====================
 Now, let's load the table content from a csv file.
 
+Prepare the csv example file
+----------------------------
 This is our example table data:
 
-|Shape|Corners|Edges|
+|shape|corners|edges|
 |-----|-------|-----|
 |rectangle|4|4|
 |circle|0|0|
@@ -42,7 +44,7 @@ This is our example table data:
 
 Save the table content in csv format to a file `shapes.csv`:
 ```
-Shape,Corners,Edges
+shape,corners,edges
 rectangle,4,4
 circle,0,0
 triangle,3,3
@@ -57,5 +59,78 @@ sphere,0,0
 ```
 
 and upload this file to your Android device. Easiest way is to use drag&drop via the Device File Explorer in Android Studio.
+
+Create the data object
+----------------------
+Change the content of `PlaceholderContent.kt` to
+
+```kotlin
+import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
+import io.blackmo18.kotlin.grass.dsl.grass
+import java.io.InputStream
+import java.util.ArrayList
+
+object PlaceholderContent {
+
+    var db: MutableList<Entry> = ArrayList()
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun readStrictCsv(inputStream: InputStream) {
+        val csvContents = csvReader().readAllWithHeader(inputStream)
+        db = grass<Entry>().harvest(csvContents) as MutableList<Entry>
+    }
+
+    fun isEmpty(): Boolean {
+        return db.isEmpty()
+    }
+
+    fun getEntries(): List<Entry> {
+        return db
+    }
+
+    fun readFromCsv(inputStream: InputStream) {
+        readStrictCsv(inputStream)
+    }
+
+    data class Entry(val shape: String,
+                     var corners: Int,
+                     var edges: Int) {
+        override fun toString(): String = shape + "," +
+                corners.toString() + "," +
+                edges.toString()
+    }
+}
+```
+
+This object uses a csv reader class from `doyaaaaaken` combined with `grass`.
+In `build.gradle` (Module :app) add the following dependencies:
+
+```kotlin
+    // doyaaaaaken's kotlin-csv
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.7.0")
+    // kotlin-grass
+    implementation("io.github.blackmo18:kotlin-grass-core-jvm:1.0.0")
+    implementation("io.github.blackmo18:kotlin-grass-parser-jvm:0.8.0")
+```
+
+Please note the function
+```kotlin
+    fun readFromCsv(inputStream: InputStream) {
+        readStrictCsv(inputStream)
+    }
+```
+
+which calls
+
+´´´kotlin
+    private fun readStrictCsv(inputStream: InputStream) {
+        val csvContents = csvReader().readAllWithHeader(inputStream)
+        db = grass<Entry>().harvest(csvContents) as MutableList<Entry>
+    }
+´´´
+
+to fill the data object with the content from a csv file.
+We will see later how this is used.
+
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
