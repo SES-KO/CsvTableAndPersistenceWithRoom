@@ -56,5 +56,6 @@ cone,1,1
 sphere,0,0
 ```
 
+and upload this file to your Android device. Easiest way is to use drag&drop via the Device File Explorer in Android Studio.
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
