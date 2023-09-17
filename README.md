@@ -132,5 +132,27 @@ which calls
 to fill the data object with the content from a csv file.
 We will see later how this is used.
 
+`MainActivity.kt`:
+
+```kotlin
+...
+import android.net.Uri
+import com.sesko.csvtableandpersistencewithroom.placeholder.PlaceholderContent
+import java.io.File
+...
+        private var csvFileName: File = File(Environment.getExternalStorageDirectory(), 
+        "Download/shapes.csv")
+...
+    companion object {
+        val content: PlaceholderContent = PlaceholderContent
+    }
+...
+    private fun readContentFromCsv() {
+        val uri: Uri = Uri.fromFile(csvFileName)
+        val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
+        content.readFromCsv(csvInputStream)
+    }
+...
+```
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
