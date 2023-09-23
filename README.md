@@ -135,11 +135,57 @@ We will see later how this is used.
 Adapt the content of `MyItemRecycleViewAdapter.kt` to
 
 ```kotlin
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = values[position]
+        holder.shapeView.text = item.shape
+        holder.cornersView.text = item.corners.toString()
+        holder.edgesView.text = item.edges.toString()
+    }
+
+    override fun getItemCount(): Int = values.size
+
+    inner class ViewHolder(binding: FragmentItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        val shapeView: TextView = binding.shape
+        val cornersView: TextView = binding.corners
+        val edgesView: TextView = binding.edges
+
+        override fun toString(): String {
+            return super.toString() + " '" + shapeView.text + "," +
+                    cornersView.text + "," + edgesView.text + "'"
+        }
+    }
 ```
 
-Adapt the content of `ItemFragment.kt` to
+Change the content of `ItemFragment.kt` to
 
 ```kotlin
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/shape"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <TextView
+        android:id="@+id/corners"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <TextView
+        android:id="@+id/edges"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/text_margin"
+        android:textAppearance="?attr/textAppearanceListItem" />
+</LinearLayout>
 ```
 
 `MainActivity.kt`:
