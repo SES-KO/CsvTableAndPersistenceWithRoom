@@ -213,4 +213,20 @@ import java.io.File
 
 TODO: bind readContentFromCsv() with action
 
+Setting the Android permissions to read from the file system
+============================================================
+
+When trying to run the App, the following error will occur
+
+```
+java.io.FileNotFoundException: /storage/emulated/0/Download/shapes.csv (Permission denied)
+```
+
+To solve this, Android permissions to read from the file system must be given.
+
+Up to SDC Version 32, the following line to the `AndroidManifest.xml` after `<manifest .../>` will solve this:
+```xml
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+```
+
 THIS PROJECT IS STILL WORK IN PROGRESS!
