@@ -90,10 +90,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun readContentFromCsv() {
-        println("Reading from csv file...")
         val uri: Uri = Uri.fromFile(csvFileName)
         val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
         content.readFromCsv(csvInputStream)
-        println("...reading completed.")
+        refreshCurrentFragment()
+    }
+
+    private fun refreshCurrentFragment() {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        val id = navController.currentDestination?.id
+        navController.popBackStack(id!!,true)
+        navController.navigate(id)
     }
 }
