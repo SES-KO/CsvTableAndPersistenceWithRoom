@@ -158,7 +158,7 @@ Adapt the content of `MyItemRecycleViewAdapter.kt` to
 
 Change the content of `ItemFragment.kt` to
 
-```kotlin
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
@@ -188,7 +188,7 @@ Change the content of `ItemFragment.kt` to
 </LinearLayout>
 ```
 
-`MainActivity.kt`:
+Define the csv filename and bind csv reading to the floating button `fab` in `MainActivity.kt`:
 
 ```kotlin
 ...
@@ -221,7 +221,8 @@ import java.io.File
 
 Changing the icon of the floating button
 ----------------------------------------
-At first we exchange the "mail" icon to a download icon from material design icons db.
+The floating button still shows a "mail" icon.
+Let's change it to an "input" icon from material design icons db.
 
 In the "Project" browser, right-click and choose "New->Vector Asset".
 Click on "Clip art", enter "input" in the search field and select the "input" icon and click "Next" and "Finish".
@@ -254,9 +255,9 @@ Up to SDC Version 32, the following line to the `AndroidManifest.xml` after `<ma
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
 
-and the user is requested to allow the access to the file system:
+and the user is requested to allow the access to the file system in `MainActivity.kt`:
 
-```MainActivity.kt
+```kotlin
     private val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -279,6 +280,26 @@ and the user is requested to allow the access to the file system:
 
             return;
         }
+    }
+```
+
+Refreshing the current fragment
+-------------------------------
+
+After loading the CSV content, the fragment with the table view must be rebuilt.
+This can be done with the following code in `MainActivity.kt`:
+
+```kotlin
+   private fun readContentFromCsv() {
+        ...
+        refreshCurrentFragment()
+    }
+
+    private fun refreshCurrentFragment() {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        val id = navController.currentDestination?.id
+        navController.popBackStack(id!!,true)
+        navController.navigate(id)
     }
 ```
 
