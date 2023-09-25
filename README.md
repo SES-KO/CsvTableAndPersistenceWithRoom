@@ -203,6 +203,14 @@ import java.io.File
         val content: PlaceholderContent = PlaceholderContent
     }
 ...
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ...
+
+        binding.fab.setOnClickListener { 
+            readContentFromCsv()
+        }
+    }
+...
     private fun readContentFromCsv() {
         val uri: Uri = Uri.fromFile(csvFileName)
         val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
@@ -211,22 +219,67 @@ import java.io.File
 ...
 ```
 
-TODO: bind readContentFromCsv() with action
+Changing the icon of the floating button
+----------------------------------------
+At first we exchange the "mail" icon to a download icon from material design icons db.
+
+In the "Project" browser, right-click and choose "New->Vector Asset".
+Click on "Clip art", enter "input" in the search field and select the "input" icon and click "Next" and "Finish".
+
+Change the icon name as follows in `res/layout/activity_main.xml`:
+```xml
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="16dp"
+        app:srcCompat="@drawable/baseline_input_24" />
+```
 
 Setting the Android permissions to read from the file system
 ============================================================
 
-When trying to run the App, the following error will occur
+When trying to run the App and clicking on the floating input button, the following error will occur:
 
 ```
 java.io.FileNotFoundException: /storage/emulated/0/Download/shapes.csv (Permission denied)
 ```
 
-To solve this, Android permissions to read from the file system must be given.
+To solve this, Android permissions to read from the file system must be given
 
 Up to SDC Version 32, the following line to the `AndroidManifest.xml` after `<manifest .../>` will solve this:
 ```xml
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+```
+
+and the user is requested to allow the access to the file system:
+
+```MainActivity.kt
+    private val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 1
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        ...
+
+        appRequestPermissions()
+    }
+
+    private fun appRequestPermissions() {
+        if (checkSelfPermission(READ_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            if (shouldShowRequestPermissionRationale(READ_EXTERNAL_STORAGE)) {
+                // TODO: show explanation
+            }
+
+            requestPermissions(
+                arrayOf(READ_EXTERNAL_STORAGE.toString()),
+                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+            return;
+        }
+    }
 ```
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
