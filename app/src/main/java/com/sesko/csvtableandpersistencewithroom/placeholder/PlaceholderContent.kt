@@ -7,29 +7,29 @@ import java.util.ArrayList
 
 object PlaceholderContent {
 
-    var db: MutableList<Entry> = ArrayList()
+    var ITEMS: MutableList<PlaceholderItem> = ArrayList()
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun readStrictCsv(inputStream: InputStream) {
         val csvContents = csvReader().readAllWithHeader(inputStream)
-        db = grass<Entry>().harvest(csvContents) as MutableList<Entry>
+        ITEMS = grass<PlaceholderItem>().harvest(csvContents) as MutableList<PlaceholderItem>
     }
 
     fun isEmpty(): Boolean {
-        return db.isEmpty()
+        return ITEMS.isEmpty()
     }
 
-    fun getEntries(): List<Entry> {
-        return db
+    fun getEntries(): List<PlaceholderItem> {
+        return ITEMS
     }
 
     fun readFromCsv(inputStream: InputStream) {
         readStrictCsv(inputStream)
     }
 
-    data class Entry(val shape: String,
-                     var corners: Int,
-                     var edges: Int) {
+    data class PlaceholderItem(val shape: String,
+                               var corners: Int,
+                               var edges: Int) {
         override fun toString(): String = shape + "," +
                 corners.toString() + "," +
                 edges.toString()
