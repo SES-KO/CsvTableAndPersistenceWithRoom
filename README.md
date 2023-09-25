@@ -188,7 +188,7 @@ Change the content of `ItemFragment.kt` to
 </LinearLayout>
 ```
 
-`MainActivity.kt`:
+Define the csv filename and bind csv reading to the floating button `fab` in `MainActivity.kt`:
 
 ```kotlin
 ...
@@ -221,7 +221,8 @@ import java.io.File
 
 Changing the icon of the floating button
 ----------------------------------------
-At first we exchange the "mail" icon to a download icon from material design icons db.
+The floating button still shows a "mail" icon.
+Let's change it to an "input" icon from material design icons db.
 
 In the "Project" browser, right-click and choose "New->Vector Asset".
 Click on "Clip art", enter "input" in the search field and select the "input" icon and click "Next" and "Finish".
