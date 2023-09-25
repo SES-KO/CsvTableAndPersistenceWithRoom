@@ -158,7 +158,7 @@ Adapt the content of `MyItemRecycleViewAdapter.kt` to
 
 Change the content of `ItemFragment.kt` to
 
-```kotlin
+```xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
@@ -255,9 +255,9 @@ Up to SDC Version 32, the following line to the `AndroidManifest.xml` after `<ma
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
 
-and the user is requested to allow the access to the file system:
+and the user is requested to allow the access to the file system in `MainActivity.kt`:
 
-```MainActivity.kt
+```kotlin
     private val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -280,6 +280,26 @@ and the user is requested to allow the access to the file system:
 
             return;
         }
+    }
+```
+
+Refreshing the current fragment
+-------------------------------
+
+After loading the CSV content, the fragment with the table view must be rebuilt.
+This can be done with the following code in `MainActivity.kt`:
+
+```kotlin
+   private fun readContentFromCsv() {
+        ...
+        refreshCurrentFragment()
+    }
+
+    private fun refreshCurrentFragment() {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        val id = navController.currentDestination?.id
+        navController.popBackStack(id!!,true)
+        navController.navigate(id)
     }
 ```
 
