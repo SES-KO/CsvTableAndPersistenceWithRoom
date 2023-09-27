@@ -307,8 +307,9 @@ When running this code, the table view is not satisfying:
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_1.png" width="128"/>
 
-The reason ist, that we have changed the item view to a table row view, but still use the RecyclerView in the original manner.
-Simply change the `GridLayoutManager` to `LinearLayoutManager`. In addition, `DividerItemDecoration` is used to separate each row with a thin line.
+The reason ist, that we have changed the item view to a table row view, but still use the ItemFragment in the original manner.
+In `ItemFragment.kt` simply change the `GridLayoutManager` to `LinearLayoutManager`.
+In addition, `DividerItemDecoration` is used to separate each row with a thin line.
 
 ```kotlin
     override fun onCreateView(
