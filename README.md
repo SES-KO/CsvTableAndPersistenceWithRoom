@@ -388,4 +388,10 @@ The `fragment_item.xml` content becomes:
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_3.png" width="128"/>
 
+Adding the table header row
+---------------------------
+
+The header of the table columns are missing. This is how to add them to the table view.
+
+
 THIS PROJECT IS STILL WORK IN PROGRESS!
