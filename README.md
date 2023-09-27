@@ -303,4 +303,89 @@ This can be done with the following code in `MainActivity.kt`:
     }
 ```
 
+When running this code, the table view is not satisfying:
+
+<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_1.png" width="128"/>
+
+The reason ist, that we have changed the item view to a table row view, but still use the RecyclerView in the original manner.
+Simply change the `GridLayoutManager` to `LinearLayoutManager`. In addition, `DividerItemDecoration` is used to separate each row with a thin line.
+
+```kotlin
+    override fun onCreateView(
+        ...
+
+        // Set the adapter
+        if (view is RecyclerView) {
+            with(view) {
+                view.addItemDecoration(DividerItemDecoration(context,
+                    DividerItemDecoration.VERTICAL))
+                layoutManager = LinearLayoutManager(context)
+                adapter = MyItemRecyclerViewAdapter(PlaceholderContent.ITEMS)
+            }
+        }
+        return view
+    }
+```
+
+It looks more like a table, but the columns are not aligned, now:
+
+<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_2.png" width="128"/>
+
+This can be achieved by wrapping each `TextView` in `fragment_item.xml` into a `LinearLayout` 
+and changing `android:layout_width="match_content"` to `android:layout_width="match_parent"` to spread the table to the width of the fragment.
+The `fragment_item.xml` content becomes:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.25"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+        <TextView
+            android:id="@+id/shape"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="?attr/textAppearanceListItem" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.25"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+        <TextView
+            android:id="@+id/corners"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="?attr/textAppearanceListItem" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.25"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+        <TextView
+            android:id="@+id/edges"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/text_margin"
+            android:textAppearance="?attr/textAppearanceListItem" />
+    </LinearLayout>
+</LinearLayout>
+```
+
+<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_3.png" width="128"/>
+
 THIS PROJECT IS STILL WORK IN PROGRESS!
