@@ -329,7 +329,7 @@ Simply change the `GridLayoutManager` to `LinearLayoutManager`. In addition, `Di
 
 It looks more like a table, but the columns are not aligned, now:
 
-<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_0.png" width="128"/>
+<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_2.png" width="128"/>
 
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
