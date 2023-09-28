@@ -491,4 +491,38 @@ class ItemFragment : Fragment() {
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_4.png" width="128"/>
 
+Adding persistance with Room
+============================
+
+So far, the data is lost when the application is closed. Room is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
+
+Add the Room version to the project-level `build.grade` file and enable `ksp` (Kotlin Symbol Processing):
+
+```kotlin
+plugins {
+    ...
+    id 'com.google.devtools.ksp' version '1.8.0-1.0.8' apply false
+}
+ext {
+   room_version = '2.4.2'
+}
+```
+
+Add the dependencies to the module-level `build.grade` file:
+```kotlin
+plugins {
+    ...
+    id 'com.google.devtools.ksp'
+}
+...
+dependencies {
+    ...
+    implementation "androidx.room:room-runtime:$room_version"
+    ksp("androidx.room:room-compiler:$room_version")
+    
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
+}
+```
+
 THIS PROJECT IS STILL WORK IN PROGRESS!
