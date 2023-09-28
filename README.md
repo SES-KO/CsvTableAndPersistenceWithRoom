@@ -346,7 +346,7 @@ The `fragment_item.xml` content becomes:
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
+        android:layout_weight="0.33"
         android:orientation="vertical"
         android:gravity="center_horizontal">
         <TextView
@@ -360,7 +360,7 @@ The `fragment_item.xml` content becomes:
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
+        android:layout_weight="0.33"
         android:orientation="vertical"
         android:gravity="center_horizontal">
         <TextView
@@ -374,7 +374,7 @@ The `fragment_item.xml` content becomes:
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
+        android:layout_weight="0.33"
         android:orientation="vertical"
         android:gravity="center_horizontal">
         <TextView
