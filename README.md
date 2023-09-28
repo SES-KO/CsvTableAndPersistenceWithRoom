@@ -156,7 +156,7 @@ Adapt the content of `MyItemRecycleViewAdapter.kt` to
     }
 ```
 
-Change the content of `ItemFragment.kt` to
+Change the content of `fragment_item.xml` to
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -393,6 +393,100 @@ Adding the table header row
 ---------------------------
 
 The header of the table columns are missing. This is how to add them to the table view.
+
+Change the `fragment_item_list.xml` to:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/table_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.33"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_margin="@dimen/text_margin"
+            android:text="Shape"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceListItem" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.33"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_margin="@dimen/text_margin"
+            android:text="Corners"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceListItem" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.33"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_margin="@dimen/text_margin"
+            android:text="Edges"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceListItem" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:name="com.sesko.csvtableandpersistencewithroom.ItemFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"/>
+</LinearLayout>
+```
+
+and `ItemFragment.kt` to:
+
+```kotlin
+class ItemFragment : Fragment() {
+
+    private var _binding: FragmentItemListBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var recyclerView: RecyclerView
+
+    ...
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentItemListBinding.inflate(inflater, container, false)
+        val view = binding.root
+        recyclerView = binding.recyclerView
+
+        // Set the adapter
+        with(recyclerView) {
+            recyclerView.addItemDecoration(
+                DividerItemDecoration(
+                    context,
+                    DividerItemDecoration.VERTICAL
+                )
+            )
+            layoutManager = LinearLayoutManager(context)
+            adapter = MyItemRecyclerViewAdapter(PlaceholderContent.ITEMS)
+        }
+        return view
+    }
+    ...
+```
 
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
