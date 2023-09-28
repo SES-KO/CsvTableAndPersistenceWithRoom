@@ -489,4 +489,6 @@ class ItemFragment : Fragment() {
 ```
 
 
+<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_4.png" width="128"/>
+
 THIS PROJECT IS STILL WORK IN PROGRESS!
