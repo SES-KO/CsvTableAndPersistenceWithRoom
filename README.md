@@ -81,7 +81,7 @@ object PlaceholderContent {
                 val (shape, corners, edges)
                         = it.split(',', ignoreCase = false, limit = 3)
                 PlaceholderItem(shape, corners.toInt(), edges.toInt())
-            }.toList().toMutableList()
+            }.toMutableList()
     }
 
     fun isEmpty(): Boolean {
