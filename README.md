@@ -65,8 +65,6 @@ Code the data object
 Change the content of `PlaceholderContent.kt` to
 
 ```kotlin
-import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import io.blackmo18.kotlin.grass.dsl.grass
 import java.io.InputStream
 import java.util.ArrayList
 
@@ -74,10 +72,16 @@ object PlaceholderContent {
 
     var ITEMS: MutableList<Entry> = ArrayList()
 
-    @OptIn(ExperimentalStdlibApi::class)
-    private fun readStrictCsv(inputStream: InputStream) {
-        val csvContents = csvReader().readAllWithHeader(inputStream)
-        ITEMS = grass<PlaceholderItem>().harvest(csvContents) as MutableList<PlaceholderItem>
+    private fun csvReader(inputStream: InputStream): MutableList<PlaceholderItem> {
+        val reader = inputStream.bufferedReader()
+        val header = reader.readLine()
+        return reader.lineSequence()
+            .filter { it.isNotBlank() }
+            .map {
+                val (shape, corners, edges)
+                        = it.split(',', ignoreCase = false, limit = 3)
+                PlaceholderItem(shape, corners.toInt(), edges.toInt())
+            }.toList().toMutableList()
     }
 
     fun isEmpty(): Boolean {
@@ -88,8 +92,8 @@ object PlaceholderContent {
         return ITEMS
     }
 
-    fun readFromCsv(inputStream: InputStream) {
-        readStrictCsv(inputStream)
+    fun readCsv(inputStream: InputStream) {
+        ITEMS = csvReader(inputStream)
     }
 
     data class PlaceholderItem(val shape: String,
@@ -102,30 +106,26 @@ object PlaceholderContent {
 }
 ```
 
-This object uses a csv reader class from `doyaaaaaken` combined with `grass`.
-In `build.gradle` (Module :app) add the following dependencies:
-
-```kotlin
-    // doyaaaaaken's kotlin-csv
-    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:1.7.0")
-    // kotlin-grass
-    implementation("io.github.blackmo18:kotlin-grass-core-jvm:1.0.0")
-    implementation("io.github.blackmo18:kotlin-grass-parser-jvm:0.8.0")
-```
-
 Please note the function
 ```kotlin
-    fun readFromCsv(inputStream: InputStream) {
-        readStrictCsv(inputStream)
+    fun readCsv(inputStream: InputStream) {
+        ITEMS = csvReader(inputStream)
     }
 ```
 
 which calls
 
 ```kotlin
-    private fun readStrictCsv(inputStream: InputStream) {
-        val csvContents = csvReader().readAllWithHeader(inputStream)
-        db = grass<Entry>().harvest(csvContents) as MutableList<Entry>
+    private fun csvReader(inputStream: InputStream): MutableList<PlaceholderItem> {
+        val reader = inputStream.bufferedReader()
+        val header = reader.readLine()
+        return reader.lineSequence()
+            .filter { it.isNotBlank() }
+            .map {
+                val (shape, corners, edges)
+                        = it.split(',', ignoreCase = false, limit = 3)
+                PlaceholderItem(shape, corners.toInt(), edges.toInt())
+            }.toList().toMutableList()
     }
 ```
 
@@ -214,7 +214,7 @@ import java.io.File
     private fun readContentFromCsv() {
         val uri: Uri = Uri.fromFile(csvFileName)
         val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
-        content.readFromCsv(csvInputStream)
+        content.readCsv(csvInputStream)
     }
 ...
 ```
@@ -346,7 +346,7 @@ The `fragment_item.xml` content becomes:
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
+        android:layout_weight="0.33"
         android:orientation="vertical"
         android:gravity="center_horizontal">
         <TextView
@@ -360,7 +360,7 @@ The `fragment_item.xml` content becomes:
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
+        android:layout_weight="0.33"
         android:orientation="vertical"
         android:gravity="center_horizontal">
         <TextView
@@ -374,7 +374,7 @@ The `fragment_item.xml` content becomes:
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="0.25"
+        android:layout_weight="0.33"
         android:orientation="vertical"
         android:gravity="center_horizontal">
         <TextView
@@ -490,5 +490,39 @@ class ItemFragment : Fragment() {
 
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_4.png" width="128"/>
+
+Adding persistance with Room
+============================
+
+So far, the data is lost when the application is closed. Room is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
+
+Add the Room version to the project-level `build.grade` file and enable `ksp` (Kotlin Symbol Processing):
+
+```kotlin
+plugins {
+    ...
+    id 'com.google.devtools.ksp' version '1.8.0-1.0.8' apply false
+}
+ext {
+   room_version = '2.4.2'
+}
+```
+
+Add the dependencies to the module-level `build.grade` file:
+```kotlin
+plugins {
+    ...
+    id 'com.google.devtools.ksp'
+}
+...
+dependencies {
+    ...
+    implementation "androidx.room:room-runtime:$room_version"
+    ksp("androidx.room:room-compiler:$room_version")
+    
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
+}
+```
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
