@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     private fun readContentFromCsv() {
         val uri: Uri = Uri.fromFile(csvFileName)
         val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
-        content.readFromCsv(csvInputStream)
+        content.readCsv(csvInputStream)
         refreshCurrentFragment()
     }
 
