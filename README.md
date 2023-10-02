@@ -60,8 +60,8 @@ sphere,0,0
 
 and upload this file to your Android device. Easiest way is to use drag&drop via the Device File Explorer in Android Studio.
 
-Code the data object
---------------------
+Create the entity
+-----------------
 Create a new package `database`.
 Inside `database` create a new package called `shapes`.
 Add a kotlin file with name `Shape.kt` in `database.shapes` with the following content
@@ -100,6 +100,8 @@ class CsvUtils {
 }
 ```
 
+Update the data content
+-----------------------
 Change the content of `PlaceholderContent.kt` to
 
 ```kotlin
@@ -125,6 +127,8 @@ Since we have changed the variable name `ITEMS` to `shapes`, we must correct all
     }
 ```
 
+Change the view adapter
+-----------------------
 Adapt the content of `MyItemRecycleViewAdapter.kt` to
 
 ```kotlin
@@ -186,6 +190,8 @@ Change the content of `fragment_item.xml` to
 </LinearLayout>
 ```
 
+Add csv reading action
+----------------------
 Define the csv filename and bind csv reading to the floating button `fab` in `MainActivity.kt`:
 
 ```kotlin
@@ -479,7 +485,7 @@ class ItemFragment : Fragment() {
                 )
             )
             layoutManager = LinearLayoutManager(context)
-            adapter = MyItemRecyclerViewAdapter(PlaceholderContent.ITEMS)
+            adapter = MyItemRecyclerViewAdapter(PlaceholderContent.shapes)
         }
         return view
     }
