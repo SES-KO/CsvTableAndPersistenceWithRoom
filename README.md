@@ -61,80 +61,78 @@ sphere,0,0
 and upload this file to your Android device. Easiest way is to use drag&drop via the Device File Explorer in Android Studio.
 
 Code the data object
-----------------------
-Change the content of `PlaceholderContent.kt` to
+--------------------
+Create a new package `database`.
+Inside `database` create a new package called `shapes`.
+Add a kotlin file with name `Shape.kt` in `database.shapes` with the following content
 
 ```kotlin
-import java.io.InputStream
-import java.util.ArrayList
+data class Shape(
+    val id: Int,
+    val shape: String,
+    val corners: Int,
+    val edges: Int
+)
+```
 
-object PlaceholderContent {
+Create the CSV methods
+----------------------
+Create a new package `utils` and inside a new kotlin class `CsvUtils` with the following content:
 
-    var ITEMS: MutableList<Entry> = ArrayList()
+```kotlin
+class CsvUtils {
 
-    private fun csvReader(inputStream: InputStream): MutableList<PlaceholderItem> {
-        val reader = inputStream.bufferedReader()
-        val header = reader.readLine()
-        return reader.lineSequence()
-            .filter { it.isNotBlank() }
-            .map {
-                val (shape, corners, edges)
-                        = it.split(',', ignoreCase = false, limit = 3)
-                PlaceholderItem(shape, corners.toInt(), edges.toInt())
-            }.toMutableList()
-    }
-
-    fun isEmpty(): Boolean {
-        return ITEMS.isEmpty()
-    }
-
-    fun getEntries(): List<PlaceholderItem> {
-        return ITEMS
-    }
-
-    fun readCsv(inputStream: InputStream) {
-        ITEMS = csvReader(inputStream)
-    }
-
-    data class PlaceholderItem(val shape: String,
-                               var corners: Int,
-                               var edges: Int) {
-        override fun toString(): String = shape + "," +
-                corners.toString() + "," +
-                edges.toString()
+    companion object {
+        fun csvReader(inputStream: InputStream): List<Shape> {
+            val reader = inputStream.bufferedReader()
+            val header = reader.readLine()
+            var id = -1
+            return reader.lineSequence()
+                .filter { it.isNotBlank() }
+                .map {
+                    val (shape, corners, edges)
+                            = it.split(',', ignoreCase = false, limit = 3)
+                    id += 1
+                    Shape(id, shape, corners.toInt(), edges.toInt())
+                }.toList()
+        }
     }
 }
 ```
 
-Please note the function
+Change the content of `PlaceholderContent.kt` to
+
 ```kotlin
+object PlaceholderContent {
+
+    var shapes: List<Shape> = ArrayList()
+
     fun readCsv(inputStream: InputStream) {
-        ITEMS = csvReader(inputStream)
+        shapes = CsvUtils.csvReader(inputStream)
     }
+
+}
 ```
 
-which calls
+Since we have changed the variable name `ITEMS` to `shapes`, we must correct all occurances. Correct the line in `ItemFragment.kt` as follows:
 
 ```kotlin
-    private fun csvReader(inputStream: InputStream): MutableList<PlaceholderItem> {
-        val reader = inputStream.bufferedReader()
-        val header = reader.readLine()
-        return reader.lineSequence()
-            .filter { it.isNotBlank() }
-            .map {
-                val (shape, corners, edges)
-                        = it.split(',', ignoreCase = false, limit = 3)
-                PlaceholderItem(shape, corners.toInt(), edges.toInt())
-            }.toList().toMutableList()
+    override fun onCreateView(
+        ...
+            adapter = MyItemRecyclerViewAdapter(PlaceholderContent.shapes)
+      }
+        return view
     }
 ```
-
-to fill the data object with the content from a csv file.
-We will see later how this is used.
 
 Adapt the content of `MyItemRecycleViewAdapter.kt` to
 
 ```kotlin
+class MyItemRecyclerViewAdapter(
+    private val values: List<Shape>
+) : RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder>() {
+   ...
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
         holder.shapeView.text = item.shape
@@ -200,7 +198,7 @@ import java.io.File
         "Download/shapes.csv")
 ...
     companion object {
-        val content: PlaceholderContent = PlaceholderContent
+        val shapes: PlaceholderContent = PlaceholderContent
     }
 ...
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -214,7 +212,7 @@ import java.io.File
     private fun readContentFromCsv() {
         val uri: Uri = Uri.fromFile(csvFileName)
         val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
-        content.readCsv(csvInputStream)
+        shapes.readCsv(csvInputStream)
     }
 ...
 ```
@@ -321,7 +319,7 @@ In addition, `DividerItemDecoration` is used to separate each row with a thin li
                 view.addItemDecoration(DividerItemDecoration(context,
                     DividerItemDecoration.VERTICAL))
                 layoutManager = LinearLayoutManager(context)
-                adapter = MyItemRecyclerViewAdapter(PlaceholderContent.ITEMS)
+                adapter = MyItemRecyclerViewAdapter(PlaceholderContent.shapes)
             }
         }
         return view
@@ -504,7 +502,7 @@ plugins {
     id 'com.google.devtools.ksp' version '1.8.0-1.0.8' apply false
 }
 ext {
-   room_version = '2.4.2'
+   room_version = '2.5.2'
 }
 ```
 
@@ -524,5 +522,25 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
 }
 ```
+
+Room works with annotations. Add them to the entity `Shape.kt`:
+
+```kotlin
+import androidx.annotation.NonNull
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
+data class Shape(
+    @PrimaryKey val id: Int,
+    @NonNull @ColumnInfo(name = "shape") val shape: String,
+    @NonNull @ColumnInfo(name = "corners") val corners: Int,
+    @NonNull @ColumnInfo(name = "edges") val edges: Int
+)
+```
+
+DAO (Data Access Object)
+
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
