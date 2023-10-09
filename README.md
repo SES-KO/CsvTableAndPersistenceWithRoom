@@ -575,5 +575,7 @@ DAO (Data Access Object) `ShapesDao.kt`
 ...
 ```
 
+Moving floating action button to ItemFragment.kt.
+
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
