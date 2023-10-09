@@ -560,11 +560,15 @@ DAO (Data Access Object) `ShapesDao.kt`
 
 ```kotlin
 ...
+    private val viewModel: ShapesViewModel by activityViewModels {
+        ShapesViewModelFactory(
+            (activity?.application as ShapesApplication).database.shapesDao()
+        )
+    }
+...
    override fun onCreateView(
        ...
-            adapter = MyItemRecyclerViewAdapter(
-                (activity?.application as ShapesApplication).database.shapesDao().getAll()
-            )
+           adapter = MyItemRecyclerViewAdapter(viewModel.allShapes())
         }
         return view
     }
