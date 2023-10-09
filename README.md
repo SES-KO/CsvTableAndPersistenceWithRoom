@@ -546,7 +546,30 @@ data class Shape(
 )
 ```
 
-DAO (Data Access Object)
+DAO (Data Access Object) `ShapesDao.kt`
+
+`ShapesViewModel.kt`
+
+`AppDatabase.kt`
+
+`ShapesApplication.kt`
+
+`AndroidMainifest.xml`
+
+`ItemFragment.kt`
+
+```kotlin
+...
+   override fun onCreateView(
+       ...
+            adapter = MyItemRecyclerViewAdapter(
+                (activity?.application as ShapesApplication).database.shapesDao().getAll()
+            )
+        }
+        return view
+    }
+...
+```
 
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
