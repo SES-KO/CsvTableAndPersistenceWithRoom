@@ -498,7 +498,8 @@ class ItemFragment : Fragment() {
 Adding persistance with Room
 ============================
 
-So far, the data is lost when the application is closed. Room is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
+So far, the data is lost when the application is closed.
+Room is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
 
 Add the Room version to the project-level `build.grade` file and enable `ksp` (Kotlin Symbol Processing):
 
@@ -556,7 +557,7 @@ DAO (Data Access Object) `ShapesDao.kt`
 
 `AndroidMainifest.xml`
 
-`ItemFragment.kt`
+`ItemFragment.kt`:
 
 ```kotlin
 ...
@@ -575,7 +576,16 @@ DAO (Data Access Object) `ShapesDao.kt`
 ...
 ```
 
-Moving floating action button to ItemFragment.kt.
+`MyItemRecylerViewAdapter.kt`
+
+Moving floating action button to ItemFragment.kt:
+
+`MainActivity.kt`
+
+`activity_main.xml`
+
+`fragment_item_list.xml`
+
 
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
