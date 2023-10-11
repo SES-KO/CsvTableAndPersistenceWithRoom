@@ -200,11 +200,12 @@ import android.net.Uri
 import com.sesko.csvtableandpersistencewithroom.placeholder.PlaceholderContent
 import java.io.File
 ...
-        private var csvFileName: File = File(Environment.getExternalStorageDirectory(), 
-        "Download/shapes.csv")
-...
     companion object {
         val shapes: PlaceholderContent = PlaceholderContent
+        val csvFileName: File = File(
+            Environment.getExternalStorageDirectory(),
+            "Download/shapes.csv"
+        )
     }
 ...
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -217,7 +218,7 @@ import java.io.File
 ...
     private fun readContentFromCsv() {
         val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
+        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
         shapes.readCsv(csvInputStream)
     }
 ...
@@ -547,15 +548,83 @@ data class Shape(
 )
 ```
 
-DAO (Data Access Object) `ShapesDao.kt`
+DAO (Data Access Object) `ShapesDao.kt`:
+```kotlin
+@Dao
+interface ShapesDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(shapes: List<Shape?>?)
+    @Query("SELECT * FROM Shape ORDER BY shape ASC")
+    fun getAll(): List<Shape>
+}
+```
 
-`ShapesViewModel.kt`
+`ShapesViewModel.kt`:
 
-`AppDatabase.kt`
+```kotlin
+class ShapesViewModel(private val shapesDao: ShapesDao): ViewModel() {
 
-`ShapesApplication.kt`
+    fun allShapes(): List<Shape> = shapesDao.getAll()
 
-`AndroidMainifest.xml`
+    fun readCsv(inputStream: InputStream) {
+        shapesDao.insertAll(CsvUtils.csvReader(inputStream))
+    }
+}
+
+class ShapesViewModelFactory(
+    private val shapesDao: ShapesDao
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(ShapesViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ShapesViewModel(shapesDao) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+```
+
+`AppDatabase.kt`:
+
+```kotlin
+@Database(entities = arrayOf(Shape::class), version = 1)
+abstract class AppDatabase: RoomDatabase() {
+    abstract fun shapesDao(): ShapesDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context,
+                    AppDatabase::class.java,
+                    "shapes_db")
+                    .allowMainThreadQueries()
+                    .build()
+                INSTANCE = instance
+
+                instance
+            }
+        }
+    }
+}
+```
+
+`ShapesApplication.kt`:
+
+```kotlin
+class ShapesApplication : Application() {
+    val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
+}
+```
+
+`AndroidMainifest.xml`:
+
+```xml
+        android:name="com.sesko.csvtableandpersistencewithroom.ShapesApplication"
+```
 
 `ItemFragment.kt`:
 
@@ -576,15 +645,72 @@ DAO (Data Access Object) `ShapesDao.kt`
 ...
 ```
 
-`MyItemRecylerViewAdapter.kt`
-
 Moving floating action button to ItemFragment.kt:
 
-`MainActivity.kt`
+From `activity_main.xml` move the following code lines to the end of `fragment_item_list.xml`:
 
-`activity_main.xml`
+```xml
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="16dp"
+        app:srcCompat="@drawable/baseline_input_24" />
+```
 
-`fragment_item_list.xml`
+Because this shall be a floating button, the outer `LinearLayout` must be wrapped by a CoordinatorLayout in `fragment_item_list.xml`:
+
+```xml
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+    ...
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/fab"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|end"
+    android:layout_marginEnd="@dimen/fab_margin"
+    android:layout_marginBottom="64dp"
+    app:srcCompat="@drawable/baseline_input_24" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+```
+
+Move the code lines
+
+```kotlin
+        binding.fab.setOnClickListener {
+            readContentFromCsv()
+        }
+...
+   private fun readContentFromCsv() {
+        val uri: Uri = Uri.fromFile(csvFileName)
+        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+        content.readCsv(csvInputStream)
+        refreshCurrentFragment()
+    }
+```
+
+from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `onCreate` function and the `readContentFromCsv()` function is modified as follows:
+
+```kotlin
+    private fun readContentFromCsv() {
+        val uri: Uri = Uri.fromFile(csvFileName)
+        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+        shapesViewModel.readCsv(csvInputStream)
+    }
+```
+
+Please note, that we have removed the `refreshCurrentFragment()` function. When using `Room`, there is a more elegant to update the view when the database has changed. It is explained further down how to add `Flow`.
 
 
 
