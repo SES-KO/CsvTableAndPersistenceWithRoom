@@ -712,6 +712,12 @@ from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `o
 
 Please note, that we have removed the `refreshCurrentFragment()` function. When using `Room`, there is a more elegant to update the view when the database has changed. It is explained further down how to add `Flow`.
 
+Respond to data changes using Flow
+==================================
+
+The app should run without errors, now. But when clicking on the Import button, you will see no effect, because the view is not updated (as we have removed the `refreshCurrentFragment()` function).
+But when the app is closed and opened again, then it shows the full table content. So we can see, that the data loading from CSV and the persistence via Room is working well.
+
 
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
