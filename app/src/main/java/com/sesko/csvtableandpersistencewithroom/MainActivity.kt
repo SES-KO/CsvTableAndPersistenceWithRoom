@@ -2,18 +2,15 @@ package com.sesko.csvtableandpersistencewithroom
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
-import com.sesko.csvtableandpersistencewithroom.placeholder.PlaceholderContent
 import com.sesko.csvtableandpersistencewithroom.databinding.ActivityMainBinding
 import java.io.File
 
@@ -22,14 +19,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
-    private var csvFileName: File = File(Environment.getExternalStorageDirectory(),
-        "Download/shapes.csv")
+    companion object {
+        val csvFileName: File = File(
+            Environment.getExternalStorageDirectory(),
+            "Download/shapes.csv"
+        )
+    }
 
     private val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 1
-
-    companion object {
-        val content: PlaceholderContent = PlaceholderContent
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -40,13 +37,9 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
 
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-
-        binding.fab.setOnClickListener {
-            readContentFromCsv()
-        }
+        //val navController = findNavController(R.id.nav_host_fragment_content_main)
+        //appBarConfiguration = AppBarConfiguration(navController.graph)
+        //setupActionBarWithNavController(navController, appBarConfiguration)
 
         appRequestPermissions()
     }
@@ -83,23 +76,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
-    }
+    //override fun onSupportNavigateUp(): Boolean {
+    //    val navController = findNavController(R.id.nav_host_fragment_content_main)
+    //    return navController.navigateUp(appBarConfiguration)
+    //            || super.onSupportNavigateUp()
+    //}
 
-    private fun readContentFromCsv() {
-        val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = getApplicationContext().getContentResolver().openInputStream(uri)!!
-        content.readCsv(csvInputStream)
-        refreshCurrentFragment()
-    }
-
-    private fun refreshCurrentFragment() {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        val id = navController.currentDestination?.id
-        navController.popBackStack(id!!,true)
-        navController.navigate(id)
-    }
 }

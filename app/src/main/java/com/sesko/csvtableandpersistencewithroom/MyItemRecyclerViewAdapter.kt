@@ -2,11 +2,10 @@ package com.sesko.csvtableandpersistencewithroom
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
-import com.sesko.csvtableandpersistencewithroom.placeholder.PlaceholderContent.PlaceholderItem
+import com.sesko.csvtableandpersistencewithroom.database.shapes.Shape
 import com.sesko.csvtableandpersistencewithroom.databinding.FragmentItemBinding
 
 /**
@@ -14,7 +13,7 @@ import com.sesko.csvtableandpersistencewithroom.databinding.FragmentItemBinding
  * TODO: Replace the implementation with code for your data type.
  */
 class MyItemRecyclerViewAdapter(
-    private val values: List<PlaceholderItem>
+    private val values: List<Shape>
 ) : RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
