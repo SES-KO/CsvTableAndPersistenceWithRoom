@@ -700,7 +700,7 @@ Move the code lines
     }
 ```
 
-from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `onCreate` function and the `readContentFromCsv()` function is modified as follows:
+from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `onCreateView` function and the `readContentFromCsv()` function is modified as follows:
 
 ```kotlin
     private fun readContentFromCsv() {
