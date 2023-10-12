@@ -10,11 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.findNavController
 import com.sesko.csvtableandpersistencewithroom.databinding.FragmentItemListBinding
 import com.sesko.csvtableandpersistencewithroom.viewmodels.ShapesViewModel
 import com.sesko.csvtableandpersistencewithroom.viewmodels.ShapesViewModelFactory
 import com.sesko.csvtableandpersistencewithroom.MainActivity.Companion.csvFileName
+import kotlinx.coroutines.launch
 
 /**
  * A fragment representing a list of Items.
@@ -62,7 +64,11 @@ class ItemFragment : Fragment() {
                 )
             )
             layoutManager = LinearLayoutManager(context)
-            adapter = MyItemRecyclerViewAdapter(shapesViewModel.allShapes())
+            lifecycle.coroutineScope.launch {
+                shapesViewModel.allShapes().collect() {
+                    adapter = MyItemRecyclerViewAdapter(it)
+                }
+            }
         }
         return view
     }

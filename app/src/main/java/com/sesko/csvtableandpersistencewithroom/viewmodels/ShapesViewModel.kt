@@ -5,11 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.sesko.csvtableandpersistencewithroom.database.shapes.Shape
 import com.sesko.csvtableandpersistencewithroom.database.shapes.ShapesDao
 import com.sesko.csvtableandpersistencewithroom.utils.CsvUtils
+import kotlinx.coroutines.flow.Flow
 import java.io.InputStream
 
 class ShapesViewModel(private val shapesDao: ShapesDao): ViewModel() {
 
-    fun allShapes(): List<Shape> = shapesDao.getAll()
+    fun allShapes(): Flow<List<Shape>> = shapesDao.getAll()
 
     fun readCsv(inputStream: InputStream) {
         shapesDao.insertAll(CsvUtils.csvReader(inputStream))
