@@ -1,5 +1,5 @@
 # CsvTableAndPersistenceWithRoom
-Android Kotlin example to import data from csv, persist via Room and Flow, display in a table and export back to csv
+Android Kotlin example to import data from csv, display in a table and persist via Room and Flow.
 
 Setting up the project
 ======================
@@ -20,12 +20,8 @@ If you build and run this code you will see this screen
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_0.png" width="128"/>
 
-Load content from csv
-=====================
-Now, let's load the table content from a csv file.
-
-Prepare the csv example file
-----------------------------
+Preparing the csv example file
+------------------------------
 This is our example table data:
 
 |shape|corners|edges|
@@ -60,8 +56,8 @@ sphere,0,0
 
 and upload this file to your Android device. Easiest way is to use drag&drop via the Device File Explorer in Android Studio.
 
-Create the entity
------------------
+Creating the entity
+===================
 Create a new package `database`.
 Inside `database` create a new package called `shapes`.
 Add a kotlin file with name `Shape.kt` in `database.shapes` with the following content
@@ -75,8 +71,9 @@ data class Shape(
 )
 ```
 
-Create the CSV methods
-----------------------
+Loading content from csv
+========================
+
 Create a new package `utils` and inside a new kotlin class `CsvUtils` with the following content:
 
 ```kotlin
@@ -100,8 +97,8 @@ class CsvUtils {
 }
 ```
 
-Update the data content
------------------------
+Updating the model
+==================
 Change the content of `PlaceholderContent.kt` to
 
 ```kotlin
@@ -127,8 +124,8 @@ Since we have changed the variable name `ITEMS` to `shapes`, we must correct all
     }
 ```
 
-Change the view adapter
------------------------
+Changing the view adapter to the new model
+==========================================
 Adapt the content of `MyItemRecycleViewAdapter.kt` to
 
 ```kotlin
@@ -190,8 +187,8 @@ Change the content of `fragment_item.xml` to
 </LinearLayout>
 ```
 
-Add csv reading action
-----------------------
+Adding CSV file reading action
+==============================
 Define the csv filename and bind csv reading to the floating button `fab` in `MainActivity.kt`:
 
 ```kotlin
@@ -289,7 +286,7 @@ and the user is requested to allow the access to the file system in `MainActivit
 ```
 
 Refreshing the current fragment
--------------------------------
+===============================
 
 After loading the CSV content, the fragment with the table view must be rebuilt.
 This can be done with the following code in `MainActivity.kt`:
@@ -308,11 +305,18 @@ This can be done with the following code in `MainActivity.kt`:
     }
 ```
 
+Fixing the table view
+=====================
+
 When running this code, the table view is not satisfying:
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_1.png" width="128"/>
 
 The reason ist, that we have changed the item view to a table row view, but still use the ItemFragment in the original manner.
+
+Correcting the table alignment
+------------------------------
+
 In `ItemFragment.kt` simply change the `GridLayoutManager` to `LinearLayoutManager`.
 In addition, `DividerItemDecoration` is used to separate each row with a thin line.
 
@@ -395,7 +399,7 @@ The `fragment_item.xml` content becomes:
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_3.png" width="128"/>
 
 Adding the table header row
----------------------------
+===========================
 
 The header of the table columns are missing. This is how to add them to the table view.
 
@@ -753,7 +757,7 @@ Please note, that we have removed the `refreshCurrentFragment()` function.
 It is no longer needed since we have added `Flow` to automatically update the view when the database has changed.
 
 That's it
----------
+=========
 
 Everything done. When running the app and clicking the floating button, the table gets filled and we see the shapes sorted by name, so we confirm that the auto-updating is working well:
 
