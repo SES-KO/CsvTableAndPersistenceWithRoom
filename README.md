@@ -496,7 +496,7 @@ class ItemFragment : Fragment() {
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_4.png" width="128"/>
 
-Adding persistance with Room and Flow
+Adding persistence with Room and Flow
 =====================================
 
 So far, the data is lost when the application is closed.
@@ -755,10 +755,11 @@ It is no longer needed since we have added `Flow` to automatically update the vi
 That's it
 ---------
 
-Everything done. When running the app and clicking the floating button, the table gets filled and we see the shapes sorted by name:
+Everything done. When running the app and clicking the floating button, the table gets filled and we see the shapes sorted by name, so we confirm that the auto-updating is working well:
 
+<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_5.png" width="128"/>
 
+After closing the app and running again, the table is still filled as before, so we can also confirm that the data is persistent.
 
-THIS PROJECT IS STILL WORK IN PROGRESS!
 
 Sources: https://developer.android.com/codelabs/basic-android-kotlin-training-intro-room-flow
