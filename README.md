@@ -496,11 +496,15 @@ class ItemFragment : Fragment() {
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_4.png" width="128"/>
 
-Adding persistance with Room
-============================
+Adding persistance with Room and Flow
+=====================================
 
 So far, the data is lost when the application is closed.
-Room is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
+`Room` is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
+`Flow` allows auto-updating the view after the database content has changed.
+
+Adding `Room` to the project
+----------------------------
 
 Add the Room version to the project-level `build.grade` file and enable `ksp` (Kotlin Symbol Processing):
 
@@ -515,6 +519,7 @@ ext {
 ```
 
 Add the dependencies to the module-level `build.grade` file:
+
 ```kotlin
 plugins {
     ...
@@ -531,7 +536,10 @@ dependencies {
 }
 ```
 
-Room works with annotations. Add them to the entity `Shape.kt`:
+Migrating the entity to work with `Room`
+----------------------------------------
+
+Room works with annotations to map the object to the database. Add them to our entity `Shape.kt` in our `database/shapes` package:
 
 ```kotlin
 import androidx.annotation.NonNull
@@ -548,23 +556,36 @@ data class Shape(
 )
 ```
 
-DAO (Data Access Object) `ShapesDao.kt`:
+Defining the DAO
+----------------
+
+Next is to define the DAO (Data Access Object) `ShapesDao.kt` in our `database/shapes` package:
+
 ```kotlin
 @Dao
 interface ShapesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(shapes: List<Shape?>?)
     @Query("SELECT * FROM Shape ORDER BY shape ASC")
-    fun getAll(): List<Shape>
+    fun getAll(): Flow<List<Shape>>
 }
 ```
 
-`ShapesViewModel.kt`:
+This interface contains the required SQL commands to access the database.
+Also note the `Flow` type of the return type of `getAll()` function.
+
+Defining the view model
+-----------------------
+
+A direct connection between view and model is not recommended from software architecture point of view.
+So we define a view model in between.
+
+Create a new package called `viewmodels` and a new kotlin file with name `ShapesViewModel.kt` in this package:
 
 ```kotlin
 class ShapesViewModel(private val shapesDao: ShapesDao): ViewModel() {
 
-    fun allShapes(): List<Shape> = shapesDao.getAll()
+    fun allShapes(): Flow<List<Shape>> = shapesDao.getAll()
 
     fun readCsv(inputStream: InputStream) {
         shapesDao.insertAll(CsvUtils.csvReader(inputStream))
@@ -584,7 +605,13 @@ class ShapesViewModelFactory(
 }
 ```
 
-`AppDatabase.kt`:
+The view model also contains the function to read from CSV file and insert its data into the database.
+Again note the `Flow` type of the return type of `allShapes()` function.
+
+Link the database with the application
+--------------------------------------
+
+Create a new class `AppDatabase.kt` in the `database` package:
 
 ```kotlin
 @Database(entities = arrayOf(Shape::class), version = 1)
@@ -612,7 +639,7 @@ abstract class AppDatabase: RoomDatabase() {
 }
 ```
 
-`ShapesApplication.kt`:
+and a new kotlin file `ShapesApplication.kt` in the main folder:
 
 ```kotlin
 class ShapesApplication : Application() {
@@ -620,13 +647,17 @@ class ShapesApplication : Application() {
 }
 ```
 
-`AndroidMainifest.xml`:
+In `AndroidMainifest.xml` we need to name our new `ShapesApplication` class so it is used instead of the default base class Application: 
+
 
 ```xml
         android:name="com.sesko.csvtableandpersistencewithroom.ShapesApplication"
 ```
 
-`ItemFragment.kt`:
+Modify the view to work with the new database
+---------------------------------------------
+
+Define the view model and wrap the adapter call in `ItemFragment.kt into a lifecycle coroutine as follows:
 
 ```kotlin
 ...
@@ -638,14 +669,22 @@ class ShapesApplication : Application() {
 ...
    override fun onCreateView(
        ...
-           adapter = MyItemRecyclerViewAdapter(viewModel.allShapes())
+            lifecycle.coroutineScope.launch {
+                shapesViewModel.allShapes().collect() {
+                    adapter = MyItemRecyclerViewAdapter(it)
+                }
+            }
         }
         return view
     }
 ...
 ```
 
-Moving floating action button to ItemFragment.kt:
+Enabling the CSV reading
+------------------------
+
+So far, the action was handled in the MainActivity which is not good practice.
+Let's move the floating action button to ItemFragment.kt:
 
 From `activity_main.xml` move the following code lines to the end of `fragment_item_list.xml`:
 
@@ -710,45 +749,16 @@ from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `o
     }
 ```
 
-Please note, that we have removed the `refreshCurrentFragment()` function. When using `Room`, there is a more elegant to update the view when the database has changed. It is explained further down how to add `Flow`.
+Please note, that we have removed the `refreshCurrentFragment()` function.
+It is no longer needed since we have added `Flow` to automatically update the view when the database has changed.
 
-Respond to data changes using Flow
-==================================
+That's it
+---------
 
-The app should run without errors, now. But when clicking on the Import button, you will see no effect, because the view is not updated (as we have removed the `refreshCurrentFragment()` function).
-But when the app is closed and opened again, then it shows the full table content. So we can see, that the data loading from CSV and the persistence via Room is working well.
+Everything done. When running the app and clicking the floating button, the table gets filled and we see the shapes sorted by name:
 
-`ShapesDao.kt`: Change functions to return a `Flow`:
-
-```kotlin
-    fun getAll(): Flow<List<Shape>>
-```
-
-Same it is to be done in `ShapesViewModel.kt`:
-
-```kotlin
-    fun allShapes(): Flow<List<Shape>> = shapesDao.getAll()
-```
-
-Wrap the adapter call in `itemFragment.kt into a lifecycle coroutine as follows:
-
-From
-
-```kotlin
-           adapter = MyItemRecyclerViewAdapter(viewModel.allShapes())
-```
-
-to
-
-```kotlin
-            lifecycle.coroutineScope.launch {
-                shapesViewModel.allShapes().collect() {
-                    adapter = MyItemRecyclerViewAdapter(it)
-                }
-            }
-```
-
-For testing you can delete the already created database files on the phone emulator by using the device explorer `data/data/<yourAppName>/databases/*` and run the App again.
 
 
 THIS PROJECT IS STILL WORK IN PROGRESS!
+
+Sources: https://developer.android.com/codelabs/basic-android-kotlin-training-intro-room-flow
