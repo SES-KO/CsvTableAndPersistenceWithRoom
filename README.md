@@ -3,7 +3,7 @@ Android Kotlin example to import data from csv, display in a table and persist v
 
 Setting up the project
 ======================
-In Android Studio create a new project from template "Basic Activity (Material3)".
+In Android Studio create a new project from template "Basic View Activity".
 
 Our table in this example needs three columns. Let's choose ```New->Fragement->Fragment (List)``` and select "3" at column count.
 
