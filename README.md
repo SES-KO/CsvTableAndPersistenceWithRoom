@@ -515,7 +515,7 @@ Add the Room version to the project-level `build.grade` file and enable `ksp` (K
 ```kotlin
 plugins {
     ...
-    id("com.google.devtools.ksp") version "1.8.0-1.0.8" apply false
+    id("com.google.devtools.ksp") version "1.9.10-1.0.13" apply false
 }
 ext {
    room_version = '2.5.2'
