@@ -515,7 +515,7 @@ Add the Room version to the project-level `build.grade` file and enable `ksp` (K
 ```kotlin
 plugins {
     ...
-    id 'com.google.devtools.ksp' version '1.8.0-1.0.8' apply false
+    id("com.google.devtools.ksp") version "1.8.0-1.0.8" apply false
 }
 ext {
    room_version = '2.5.2'
@@ -527,16 +527,16 @@ Add the dependencies to the module-level `build.grade` file:
 ```kotlin
 plugins {
     ...
-    id 'com.google.devtools.ksp'
+    id("com.google.devtools.ksp")
 }
 ...
 dependencies {
     ...
-    implementation "androidx.room:room-runtime:$room_version"
+    implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
     
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:$room_version"
+    implementation("androidx.room:room-ktx:$room_version")
 }
 ```
 
