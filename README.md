@@ -1,9 +1,9 @@
 # CsvTableAndPersistenceWithRoom
-Android Kotlin example to import data from csv, persist via Room and Flow, display in a table and export back to csv
+Android Kotlin example to import data from csv, display in a table and persist via Room and Flow.
 
 Setting up the project
 ======================
-In Android Studio create a new project from template "Basic Activity (Material3)".
+In Android Studio create a new project from template "Basic View Activity".
 
 Our table in this example needs three columns. Let's choose ```New->Fragement->Fragment (List)``` and select "3" at column count.
 
@@ -20,12 +20,8 @@ If you build and run this code you will see this screen
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_0.png" width="128"/>
 
-Load content from csv
-=====================
-Now, let's load the table content from a csv file.
-
-Prepare the csv example file
-----------------------------
+Preparing the csv example file
+------------------------------
 This is our example table data:
 
 |shape|corners|edges|
@@ -60,8 +56,8 @@ sphere,0,0
 
 and upload this file to your Android device. Easiest way is to use drag&drop via the Device File Explorer in Android Studio.
 
-Create the entity
------------------
+Creating the entity
+===================
 Create a new package `database`.
 Inside `database` create a new package called `shapes`.
 Add a kotlin file with name `Shape.kt` in `database.shapes` with the following content
@@ -75,8 +71,9 @@ data class Shape(
 )
 ```
 
-Create the CSV methods
-----------------------
+Loading content from csv
+========================
+
 Create a new package `utils` and inside a new kotlin class `CsvUtils` with the following content:
 
 ```kotlin
@@ -100,8 +97,8 @@ class CsvUtils {
 }
 ```
 
-Update the data content
------------------------
+Updating the model
+==================
 Change the content of `PlaceholderContent.kt` to
 
 ```kotlin
@@ -127,8 +124,8 @@ Since we have changed the variable name `ITEMS` to `shapes`, we must correct all
     }
 ```
 
-Change the view adapter
------------------------
+Changing the view adapter to the new model
+==========================================
 Adapt the content of `MyItemRecycleViewAdapter.kt` to
 
 ```kotlin
@@ -190,8 +187,8 @@ Change the content of `fragment_item.xml` to
 </LinearLayout>
 ```
 
-Add csv reading action
-----------------------
+Adding CSV file reading action
+==============================
 Define the csv filename and bind csv reading to the floating button `fab` in `MainActivity.kt`:
 
 ```kotlin
@@ -200,26 +197,46 @@ import android.net.Uri
 import com.sesko.csvtableandpersistencewithroom.placeholder.PlaceholderContent
 import java.io.File
 ...
+    // Request code for selecting a CSV file.
+    val PICK_CSV_FILE = 2
+
     companion object {
         val shapes: PlaceholderContent = PlaceholderContent
-        val csvFileName: File = File(
+        val csvFileNameDir: File = File(
             Environment.getExternalStorageDirectory(),
-            "Download/shapes.csv"
+            "Download"
         )
     }
 ...
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         ...
 
         binding.fab.setOnClickListener { 
-            readContentFromCsv()
+            openFile(Uri.fromFile(csvFileNameDir))
         }
     }
 ...
-    private fun readContentFromCsv() {
-        val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
-        shapes.readCsv(csvInputStream)
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun openFile(pickerInitialUri: Uri) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+
+        startActivityForResult(Intent.createChooser(intent, "Import CSV"), 2)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapes.readCsv(csvInputStream)
+            }
+        }
     }
 ...
 ```
@@ -244,60 +261,23 @@ Change the icon name as follows in `res/layout/activity_main.xml`:
         app:srcCompat="@drawable/baseline_input_24" />
 ```
 
-Setting the Android permissions to read from the file system
-============================================================
-
-When trying to run the App and clicking on the floating input button, the following error will occur:
-
-```
-java.io.FileNotFoundException: /storage/emulated/0/Download/shapes.csv (Permission denied)
-```
-
-To solve this, Android permissions to read from the file system must be given
-
-Up to SDC Version 32, the following line to the `AndroidManifest.xml` after `<manifest .../>` will solve this:
-```xml
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-```
-
-and the user is requested to allow the access to the file system in `MainActivity.kt`:
-
-```kotlin
-    private val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 1
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        ...
-
-        appRequestPermissions()
-    }
-
-    private fun appRequestPermissions() {
-        if (checkSelfPermission(READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-
-            if (shouldShowRequestPermissionRationale(READ_EXTERNAL_STORAGE)) {
-                // TODO: show explanation
-            }
-
-            requestPermissions(
-                arrayOf(READ_EXTERNAL_STORAGE.toString()),
-                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-
-            return;
-        }
-    }
-```
-
 Refreshing the current fragment
--------------------------------
+===============================
 
 After loading the CSV content, the fragment with the table view must be rebuilt.
 This can be done with the following code in `MainActivity.kt`:
 
 ```kotlin
-   private fun readContentFromCsv() {
-        ...
-        refreshCurrentFragment()
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapes.readCsv(csvInputStream)
+                refreshCurrentFragment()
+            }
+        }
     }
 
     private fun refreshCurrentFragment() {
@@ -308,11 +288,18 @@ This can be done with the following code in `MainActivity.kt`:
     }
 ```
 
+Fixing the table view
+=====================
+
 When running this code, the table view is not satisfying:
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_1.png" width="128"/>
 
 The reason ist, that we have changed the item view to a table row view, but still use the ItemFragment in the original manner.
+
+Correcting the table alignment
+------------------------------
+
 In `ItemFragment.kt` simply change the `GridLayoutManager` to `LinearLayoutManager`.
 In addition, `DividerItemDecoration` is used to separate each row with a thin line.
 
@@ -395,7 +382,7 @@ The `fragment_item.xml` content becomes:
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_3.png" width="128"/>
 
 Adding the table header row
----------------------------
+===========================
 
 The header of the table columns are missing. This is how to add them to the table view.
 
@@ -496,18 +483,22 @@ class ItemFragment : Fragment() {
 
 <img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_4.png" width="128"/>
 
-Adding persistance with Room
-============================
+Adding persistence with Room and Flow
+=====================================
 
 So far, the data is lost when the application is closed.
-Room is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
+`Room` is an Android ORM (Object Relational Mapping) database as an abstraction layer over SQLlite.
+`Flow` allows auto-updating the view after the database content has changed.
+
+Adding `Room` to the project
+----------------------------
 
 Add the Room version to the project-level `build.grade` file and enable `ksp` (Kotlin Symbol Processing):
 
 ```kotlin
 plugins {
     ...
-    id 'com.google.devtools.ksp' version '1.8.0-1.0.8' apply false
+    id("com.google.devtools.ksp") version "1.9.10-1.0.13" apply false
 }
 ext {
    room_version = '2.5.2'
@@ -515,23 +506,27 @@ ext {
 ```
 
 Add the dependencies to the module-level `build.grade` file:
+
 ```kotlin
 plugins {
     ...
-    id 'com.google.devtools.ksp'
+    id("com.google.devtools.ksp")
 }
 ...
 dependencies {
     ...
-    implementation "androidx.room:room-runtime:$room_version"
+    implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
     
     // optional - Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:$room_version"
+    implementation("androidx.room:room-ktx:$room_version")
 }
 ```
 
-Room works with annotations. Add them to the entity `Shape.kt`:
+Migrating the entity to work with `Room`
+----------------------------------------
+
+Room works with annotations to map the object to the database. Add them to our entity `Shape.kt` in our `database/shapes` package:
 
 ```kotlin
 import androidx.annotation.NonNull
@@ -548,23 +543,36 @@ data class Shape(
 )
 ```
 
-DAO (Data Access Object) `ShapesDao.kt`:
+Defining the DAO
+----------------
+
+Next is to define the DAO (Data Access Object) `ShapesDao.kt` in our `database/shapes` package:
+
 ```kotlin
 @Dao
 interface ShapesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(shapes: List<Shape?>?)
     @Query("SELECT * FROM Shape ORDER BY shape ASC")
-    fun getAll(): List<Shape>
+    fun getAll(): Flow<List<Shape>>
 }
 ```
 
-`ShapesViewModel.kt`:
+This interface contains the required SQL commands to access the database.
+Also note the `Flow` type of the return type of `getAll()` function.
+
+Defining the view model
+-----------------------
+
+A direct connection between view and model is not recommended from software architecture point of view.
+So we define a view model in between.
+
+Create a new package called `viewmodels` and a new kotlin file with name `ShapesViewModel.kt` in this package:
 
 ```kotlin
 class ShapesViewModel(private val shapesDao: ShapesDao): ViewModel() {
 
-    fun allShapes(): List<Shape> = shapesDao.getAll()
+    fun allShapes(): Flow<List<Shape>> = shapesDao.getAll()
 
     fun readCsv(inputStream: InputStream) {
         shapesDao.insertAll(CsvUtils.csvReader(inputStream))
@@ -584,7 +592,13 @@ class ShapesViewModelFactory(
 }
 ```
 
-`AppDatabase.kt`:
+The view model also contains the function to read from CSV file and insert its data into the database.
+Again note the `Flow` type of the return type of `allShapes()` function.
+
+Link the database with the application
+--------------------------------------
+
+Create a new class `AppDatabase.kt` in the `database` package:
 
 ```kotlin
 @Database(entities = arrayOf(Shape::class), version = 1)
@@ -612,7 +626,7 @@ abstract class AppDatabase: RoomDatabase() {
 }
 ```
 
-`ShapesApplication.kt`:
+and a new kotlin file `ShapesApplication.kt` in the main folder:
 
 ```kotlin
 class ShapesApplication : Application() {
@@ -620,13 +634,17 @@ class ShapesApplication : Application() {
 }
 ```
 
-`AndroidMainifest.xml`:
+In `AndroidMainifest.xml` we need to name our new `ShapesApplication` class so it is used instead of the default base class Application: 
+
 
 ```xml
         android:name="com.sesko.csvtableandpersistencewithroom.ShapesApplication"
 ```
 
-`ItemFragment.kt`:
+Modify the view to work with the new database
+---------------------------------------------
+
+Define the view model and wrap the adapter call in `ItemFragment.kt into a lifecycle coroutine as follows:
 
 ```kotlin
 ...
@@ -638,14 +656,22 @@ class ShapesApplication : Application() {
 ...
    override fun onCreateView(
        ...
-           adapter = MyItemRecyclerViewAdapter(viewModel.allShapes())
+            lifecycle.coroutineScope.launch {
+                shapesViewModel.allShapes().collect() {
+                    adapter = MyItemRecyclerViewAdapter(it)
+                }
+            }
         }
         return view
     }
 ...
 ```
 
-Moving floating action button to ItemFragment.kt:
+Enabling the CSV reading
+------------------------
+
+So far, the action was handled in the MainActivity which is not good practice.
+Let's move the floating action button to ItemFragment.kt:
 
 From `activity_main.xml` move the following code lines to the end of `fragment_item_list.xml`:
 
@@ -688,67 +714,62 @@ Because this shall be a floating button, the outer `LinearLayout` must be wrappe
 Move the code lines
 
 ```kotlin
+    // Request code for selecting a CSV file.
+    val PICK_CSV_FILE = 2
+...
         binding.fab.setOnClickListener {
-            readContentFromCsv()
+            openFile(Uri.fromFile(csvFileNameDir))
         }
 ...
-   private fun readContentFromCsv() {
-        val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
-        content.readCsv(csvInputStream)
-        refreshCurrentFragment()
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun openFile(pickerInitialUri: Uri) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+
+        startActivityForResult(Intent.createChooser(intent, "Import CSV"), 2)
     }
-```
 
-from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `onCreateView` function and the `readContentFromCsv()` function is modified as follows:
-
-```kotlin
-    private fun readContentFromCsv() {
-        val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
-        shapesViewModel.readCsv(csvInputStream)
-    }
-```
-
-Please note, that we have removed the `refreshCurrentFragment()` function. When using `Room`, there is a more elegant to update the view when the database has changed. It is explained further down how to add `Flow`.
-
-Respond to data changes using Flow
-==================================
-
-The app should run without errors, now. But when clicking on the Import button, you will see no effect, because the view is not updated (as we have removed the `refreshCurrentFragment()` function).
-But when the app is closed and opened again, then it shows the full table content. So we can see, that the data loading from CSV and the persistence via Room is working well.
-
-`ShapesDao.kt`: Change functions to return a `Flow`:
-
-```kotlin
-    fun getAll(): Flow<List<Shape>>
-```
-
-Same it is to be done in `ShapesViewModel.kt`:
-
-```kotlin
-    fun allShapes(): Flow<List<Shape>> = shapesDao.getAll()
-```
-
-Wrap the adapter call in `itemFragment.kt into a lifecycle coroutine as follows:
-
-From
-
-```kotlin
-           adapter = MyItemRecyclerViewAdapter(viewModel.allShapes())
-```
-
-to
-
-```kotlin
-            lifecycle.coroutineScope.launch {
-                shapesViewModel.allShapes().collect() {
-                    adapter = MyItemRecyclerViewAdapter(it)
-                }
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapes.readCsv(csvInputStream)
             }
+        }
+    }
 ```
 
-For testing you can delete the already created database files on the phone emulator by using the device explorer `data/data/<yourAppName>/databases/*` and run the App again.
+from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `onCreateView` function and the `onActivityResult()` function is modified as follows:
+
+```kotlin
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapesViewModel.readCsv(csvInputStream)
+            }
+        }
+    }
+```
+
+Please note, that we have removed the `refreshCurrentFragment()` function.
+It is no longer needed since we have added `Flow` to automatically update the view when the database has changed.
+
+That's it
+=========
+
+Everything done. When running the app and clicking the floating button, the table gets filled and we see the shapes sorted by name, so we confirm that the auto-updating is working well:
+
+<img src="https://github.com/SES-KO/CsvTableAndPersistenceWithRoom/blob/master/images/three_columns_5.png" width="128"/>
+
+After closing the app and running again, the table is still filled as before, so we can also confirm that the data is persistent.
 
 
-THIS PROJECT IS STILL WORK IN PROGRESS!
+Sources: https://developer.android.com/codelabs/basic-android-kotlin-training-intro-room-flow
