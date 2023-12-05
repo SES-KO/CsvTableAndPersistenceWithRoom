@@ -197,26 +197,46 @@ import android.net.Uri
 import com.sesko.csvtableandpersistencewithroom.placeholder.PlaceholderContent
 import java.io.File
 ...
+    // Request code for selecting a CSV file.
+    val PICK_CSV_FILE = 2
+
     companion object {
         val shapes: PlaceholderContent = PlaceholderContent
-        val csvFileName: File = File(
+        val csvFileNameDir: File = File(
             Environment.getExternalStorageDirectory(),
-            "Download/shapes.csv"
+            "Download"
         )
     }
 ...
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         ...
 
         binding.fab.setOnClickListener { 
-            readContentFromCsv()
+            openFile(Uri.fromFile(csvFileNameDir))
         }
     }
 ...
-    private fun readContentFromCsv() {
-        val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
-        shapes.readCsv(csvInputStream)
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun openFile(pickerInitialUri: Uri) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+
+        startActivityForResult(Intent.createChooser(intent, "Import CSV"), 2)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapes.readCsv(csvInputStream)
+            }
+        }
     }
 ...
 ```
@@ -241,50 +261,6 @@ Change the icon name as follows in `res/layout/activity_main.xml`:
         app:srcCompat="@drawable/baseline_input_24" />
 ```
 
-Setting the Android permissions to read from the file system
-============================================================
-
-When trying to run the App and clicking on the floating input button, the following error will occur:
-
-```
-java.io.FileNotFoundException: /storage/emulated/0/Download/shapes.csv (Permission denied)
-```
-
-To solve this, Android permissions to read from the file system must be given
-
-Up to SDC Version 32, the following line to the `AndroidManifest.xml` after `<manifest .../>` will solve this:
-```xml
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-```
-
-and the user is requested to allow the access to the file system in `MainActivity.kt`:
-
-```kotlin
-    private val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 1
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        ...
-
-        appRequestPermissions()
-    }
-
-    private fun appRequestPermissions() {
-        if (checkSelfPermission(READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-
-            if (shouldShowRequestPermissionRationale(READ_EXTERNAL_STORAGE)) {
-                // TODO: show explanation
-            }
-
-            requestPermissions(
-                arrayOf(READ_EXTERNAL_STORAGE.toString()),
-                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-
-            return;
-        }
-    }
-```
-
 Refreshing the current fragment
 ===============================
 
@@ -292,9 +268,16 @@ After loading the CSV content, the fragment with the table view must be rebuilt.
 This can be done with the following code in `MainActivity.kt`:
 
 ```kotlin
-   private fun readContentFromCsv() {
-        ...
-        refreshCurrentFragment()
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapes.readCsv(csvInputStream)
+                refreshCurrentFragment()
+            }
+        }
     }
 
     private fun refreshCurrentFragment() {
@@ -731,25 +714,48 @@ Because this shall be a floating button, the outer `LinearLayout` must be wrappe
 Move the code lines
 
 ```kotlin
+    // Request code for selecting a CSV file.
+    val PICK_CSV_FILE = 2
+...
         binding.fab.setOnClickListener {
-            readContentFromCsv()
+            openFile(Uri.fromFile(csvFileNameDir))
         }
 ...
-   private fun readContentFromCsv() {
-        val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
-        content.readCsv(csvInputStream)
-        refreshCurrentFragment()
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun openFile(pickerInitialUri: Uri) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*"
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+
+        startActivityForResult(Intent.createChooser(intent, "Import CSV"), 2)
+    }
+
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapes.readCsv(csvInputStream)
+            }
+        }
     }
 ```
 
-from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `onCreateView` function and the `readContentFromCsv()` function is modified as follows:
+from `MainActivity.kt` to `ItemFragment.kt`: The button binding goes into the `onCreateView` function and the `onActivityResult()` function is modified as follows:
 
 ```kotlin
-    private fun readContentFromCsv() {
-        val uri: Uri = Uri.fromFile(csvFileName)
-        val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
-        shapesViewModel.readCsv(csvInputStream)
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (requestCode == PICK_CSV_FILE
+            && resultCode == Activity.RESULT_OK) {
+            resultData?.data?.also { uri ->
+                val csvInputStream = activity?.contentResolver?.openInputStream(uri)!!
+                shapesViewModel.readCsv(csvInputStream)
+            }
+        }
     }
 ```
 
