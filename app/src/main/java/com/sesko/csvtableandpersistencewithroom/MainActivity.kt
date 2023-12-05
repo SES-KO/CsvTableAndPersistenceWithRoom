@@ -1,14 +1,10 @@
 package com.sesko.csvtableandpersistencewithroom
 
-import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import android.view.Menu
 import android.view.MenuItem
 import com.sesko.csvtableandpersistencewithroom.databinding.ActivityMainBinding
@@ -20,13 +16,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     companion object {
-        val csvFileName: File = File(
+        val csvFileNameDir: File = File(
             Environment.getExternalStorageDirectory(),
-            "Download/shapes.csv"
+            "Download"
         )
     }
-
-    private val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: Int = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -40,24 +34,6 @@ class MainActivity : AppCompatActivity() {
         //val navController = findNavController(R.id.nav_host_fragment_content_main)
         //appBarConfiguration = AppBarConfiguration(navController.graph)
         //setupActionBarWithNavController(navController, appBarConfiguration)
-
-        appRequestPermissions()
-    }
-
-    private fun appRequestPermissions() {
-        if (checkSelfPermission(READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-
-            if (shouldShowRequestPermissionRationale(READ_EXTERNAL_STORAGE)) {
-                // TODO: show explanation
-            }
-
-            requestPermissions(
-                arrayOf(READ_EXTERNAL_STORAGE.toString()),
-                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-
-            return;
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
